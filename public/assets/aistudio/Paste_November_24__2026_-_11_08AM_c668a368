@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ujian Colored Brain - Arthur F. Carmazzi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #f1f5f9;
+      scroll-behavior: smooth;
+    }
+    .bg-brain-green { background-color: #10b981; }
+    .bg-brain-red { background-color: #ef4444; }
+    .bg-brain-purple { background-color: #8b5cf6; }
+    .bg-brain-blue { background-color: #3b82f6; }
+    .text-brain-green { color: #059669; }
+    .text-brain-red { color: #dc2626; }
+    .text-brain-purple { color: #7c3aed; }
+    .text-brain-blue { color: #2563eb; }
+    .border-brain-green { border-color: #10b981; }
+    .border-brain-red { border-color: #ef4444; }
+    .border-brain-purple { border-color: #8b5cf6; }
+    .border-brain-blue { border-color: #3b82f6; }
+
+    .choice-card {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    input[type="radio"]:checked + .choice-card {
+      border-color: #2563eb;
+      background-color: #eff6ff;
+      box-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.15);
+      transform: translateY(-1px);
+    }
+    input[type="radio"]:checked + .choice-card .radio-indicator {
+      border-color: #2563eb;
+      background-color: #2563eb;
+    }
+    input[type="radio"]:checked + .choice-card .radio-indicator::after {
+      content: '';
+      display: block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: white;
+    }
+
+    @keyframes slideUpFade {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-result {
+      animation: slideUpFade 0.6s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased pb-16">
+
+  <!-- Progress Bar -->
+  <div class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <div class="flex space-x-1">
+          <span class="w-3 h-3 rounded-full bg-brain-green"></span>
+          <span class="w-3 h-3 rounded-full bg-brain-red"></span>
+          <span class="w-3 h-3 rounded-full bg-brain-purple"></span>
+          <span class="w-3 h-3 rounded-full bg-brain-blue"></span>
+        </div>
+        <span class="font-bold text-sm md:text-base text-slate-800 tracking-tight">COLORED BRAIN TEST</span>
+      </div>
+      <div class="flex items-center space-x-3">
+        <span class="text-xs md:text-sm font-semibold text-slate-600">
+          Dijawab: <span id="progress-text" class="text-blue-600 font-bold">0 / 15</span>
+        </span>
+        <div class="w-24 md:w-36 bg-slate-200 rounded-full h-2.5 overflow-hidden">
+          <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="max-w-4xl mx-auto px-4 mt-8">
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+
+      <!-- Header -->
+      <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-8 md:p-12 text-center">
+        <span class="inline-block py-1 px-3 rounded-full bg-white/10 text-xs font-semibold tracking-wider uppercase mb-3 text-blue-300">
+          Penilaian Gaya Pemprosesan Kognitif
+        </span>
+        <h1 class="text-3xl md:text-5xl font-black tracking-tight mb-2">COLORED BRAIN TEST</h1>
+        <p class="text-slate-300 text-base md:text-lg font-medium">Oleh Arthur F. Carmazzi</p>
+
+        <div class="mt-8 max-w-md mx-auto bg-white/10 p-4 rounded-xl backdrop-blur-sm border border-white/10">
+          <label for="user-name" class="block text-sm font-medium text-slate-200 mb-2 text-left">
+            Nama Penuh Anda:
+          </label>
+          <input type="text" id="user-name" placeholder="Masukkan nama anda di sini..."
+                 class="w-full px-4 py-2.5 rounded-lg bg-white text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+        </div>
+      </header>
+
+      <!-- Status Banner -->
+      <div id="status-banner" class="hidden mx-6 md:mx-10 mt-6 p-4 rounded-xl bg-red-50 border-l-4 border-red-500 text-red-800 flex items-center justify-between shadow-sm">
+        <div class="flex items-center space-x-3">
+          <svg class="w-6 h-6 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span id="status-message" class="font-medium text-sm md:text-base"></span>
+        </div>
+      </div>
+
+      <!-- Quiz Container -->
+      <div id="quiz-container" class="p-6 md:p-10">
+
+        <!-- Section 1A -->
+        <section class="mb-14">
+          <div class="flex flex-col md:flex-row md:items-center justify-between bg-emerald-50 border-l-4 border-emerald-500 p-5 rounded-r-xl mb-6">
+            <div>
+              <h2 class="text-xl md:text-2xl font-bold text-emerald-900">Bahagian 1 (A): Gaya Pemprosesan Asas</h2>
+              <p class="text-sm text-emerald-700 mt-1">
+                Soalan 1 hingga 10 • Pilih <strong>SATU</strong> jawapan yang paling tepat menggambarkan diri anda.
+              </p>
+            </div>
+            <span class="mt-2 md:mt-0 inline-block bg-emerald-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg self-start md:self-center">
+              100 Mata
+            </span>
+          </div>
+
+          <div id="questions-1a" class="space-y-8"></div>
+
+          <div class="mt-8 p-5 bg-slate-50 rounded-xl border border-slate-200">
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-600">Markah Semasa Bahagian 1 (A)</h3>
+              <span class="text-sm font-bold text-slate-700">Jumlah: <span id="total-1a" class="text-emerald-600">0</span> / 100</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-white font-bold text-sm">
+              <div class="p-2.5 rounded-lg bg-brain-green shadow-sm">HIJAU: <span id="score-G-1a">0</span></div>
+              <div class="p-2.5 rounded-lg bg-brain-red shadow-sm">MERAH: <span id="score-R-1a">0</span></div>
+              <div class="p-2.5 rounded-lg bg-brain-purple shadow-sm">UNGU: <span id="score-P-1a">0</span></div>
+              <div class="p-2.5 rounded-lg bg-brain-blue shadow-sm">BIRU: <span id="score-B-1a">0</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 1B -->
+        <section class="mb-10">
+          <div class="flex flex-col md:flex-row md:items-center justify-between bg-rose-50 border-l-4 border-rose-500 p-5 rounded-r-xl mb-6">
+            <div>
+              <h2 class="text-xl md:text-2xl font-bold text-rose-900">Bahagian 1 (B): Fleksibiliti Pemprosesan</h2>
+              <p class="text-sm text-rose-700 mt-1">
+                Soalan 11 hingga 15 • Pilih <strong>SATU</strong> pilihan (10 mata) yang paling hampir dengan ciri-ciri anda.
+              </p>
+            </div>
+            <span class="mt-2 md:mt-0 inline-block bg-rose-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg self-start md:self-center">
+              50 Mata
+            </span>
+          </div>
+
+          <div id="questions-1b" class="space-y-8"></div>
+
+          <div class="mt-8 p-5 bg-slate-50 rounded-xl border border-slate-200">
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-slate-600">Markah Semasa Bahagian 1 (B)</h3>
+              <span class="text-sm font-bold text-slate-700">Jumlah: <span id="total-1b" class="text-rose-600">0</span> / 50</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-white font-bold text-sm">
+              <div class="p-2.5 rounded-lg bg-brain-green shadow-sm">HIJAU: <span id="score-G-1b">0</span></div>
+              <div class="p-2.5 rounded-lg bg-brain-red shadow-sm">MERAH: <span id="score-R-1b">0</span></div>
+              <div class="p-2.5 rounded-lg bg-brain-purple shadow-sm">UNGU: <span id="score-P-1b">0</span></div>
+              <div class="p-2.5 rounded-lg bg-brain-blue shadow-sm">BIRU: <span id="score-B-1b">0</span></div>
+            </div>
+          </div>
+        </section>
+
+        <div class="pt-6 border-t border-slate-200 text-center">
+          <button type="button" onclick="calculateResults()"
+                  class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg py-4 px-12 rounded-xl shadow-lg shadow-blue-600/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0">
+            Kira Keputusan Ujian
+          </button>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="results-container" class="hidden p-6 md:p-10 bg-slate-50/50 animate-result">
+        <div class="text-center mb-8">
+          <span class="inline-block px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 font-bold text-xs uppercase tracking-wider mb-2">
+            Laporan Profil Pemikiran
+          </span>
+          <h2 class="text-3xl md:text-4xl font-black text-slate-900">Keputusan Ujian Colored Brain</h2>
+        </div>
+
+        <div id="dominant-card" class="bg-white p-8 rounded-2xl shadow-md border border-slate-200 text-center mb-8"></div>
+
+        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 mb-8">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 mb-6">
+            <h3 class="text-xl font-bold text-slate-800">Skor Keseluruhan (Bahagian A + B)</h3>
+            <span class="text-sm font-bold text-slate-500 mt-1 sm:mt-0">
+              Jumlah Mata: <span id="final-total-points" class="text-slate-900 text-base">150</span> / 150
+            </span>
+          </div>
+          <div id="final-scores-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
+        </div>
+
+        <div class="mb-8">
+          <h3 class="text-xl font-bold text-slate-800 mb-4 px-1">Analisis Gaya Pemprosesan Maklumat Anda</h3>
+          <div id="detailed-analysis" class="space-y-5"></div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row justify-center gap-4 pt-4">
+          <button type="button" onclick="resetQuiz()"
+                  class="px-8 py-3.5 rounded-xl border-2 border-slate-300 text-slate-700 font-bold hover:bg-slate-100 transition">
+            Ambil Ujian Semula
+          </button>
+          <button type="button" onclick="window.print()"
+                  class="px-8 py-3.5 rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-900 transition shadow-md">
+            Cetak Keputusan
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const QUIZ_DATA = [
+      // Bahagian 1A (1-10)
+      {
+        id: 1, section: '1a',
+        ms: "Saya rasa lebih selesa mengendali projek baru apabila saya...",
+        en: "I feel more at ease in a new project when I am...",
+        options: [
+          { color: 'G', ms: "Cetusan idea yang baik untuk mendapatkan gambaran menyeluruh yang baik.", en: "Coming up with good ideas to get a good overview." },
+          { color: 'P', ms: "Mengumpul data di sekeliling usaha yang dibuat.", en: "Gathering all the facts surrounding the effort." },
+          { color: 'R', ms: "Mewujudkan rancangan untuk pelaksanaan kejayaan projek tersebut.", en: "Creating a plan for its successful implementation." },
+          { color: 'B', ms: "Mengenali mereka yang terlibat langsung dengan projek ini.", en: "Getting to know the other people involved on the project with me." }
+        ]
+      },
+      {
+        id: 2, section: '1a',
+        ms: "Saya menghadapi kekhuatiran bekerja dengan orang lain apabila saya...",
+        en: "I have the most anxiety working with others when I am...",
+        options: [
+          { color: 'G', ms: "Tidak dapat mengatasi perbezaan dan bergerak ke hadapan.", en: "Unable to get past differences and move forward." },
+          { color: 'P', ms: "Diminta untuk membuat keputusan tanpa menganalisa fakta terlebih dahulu.", en: "Asked to make decisions without reviewing the facts." },
+          { color: 'R', ms: "Diminta untuk membuat keputusan tanpa maklumat secukupnya.", en: "Asked to make decisions without enough information." },
+          { color: 'B', ms: "Tidak dapat menzahirkan perasaan sebenar yang saya rasa.", en: "Unable to express the way I truly feel." }
+        ]
+      },
+      {
+        id: 3, section: '1a',
+        ms: "Saya percaya bahawa keberkesanan berpasukan dapat diperolehi apabila...",
+        en: "I believe team effectiveness will be enhanced when...",
+        options: [
+          { color: 'G', ms: "Ahli pasukan mencuba cara baru untuk menghasilkan perkara baru.", en: "People try new ways to do new things." },
+          { color: 'R', ms: "Setiap ahli mempunyai nilai yang kuat untuk mereka ikuti.", en: "Members have strong values to guide them." },
+          { color: 'P', ms: "Setiap ahli mematuhi peranan masing-masing.", en: "People adhere to their roles." },
+          { color: 'B', ms: "Komunikasi peribadi antara setiap ahli dizahirkan.", en: "Personal communication with others is established." }
+        ]
+      },
+      {
+        id: 4, section: '1a',
+        ms: "Kekuatan utama saya ialah...",
+        en: "My greatest strengths are...",
+        options: [
+          { color: 'G', ms: "Kebolehan untuk menyahut cabaran baru dan menghasilkan penyelesaian yang kreatif.", en: "The ability to take on new challenges and come out with creative solutions." },
+          { color: 'R', ms: "Memastikan objektif tercapai di dalam setiap situasi yang memerlukan fakta dan analisa yang sesuai.", en: "To be completely objective in a solution with the right facts and proper analysis." },
+          { color: 'P', ms: "Kebolehan untuk menyerap perincian untuk membina rancangan yang praktikal.", en: "The ability to absorb details to formulate a practical plan." },
+          { color: 'B', ms: "Mempunyai firasat untuk mengesan perasaan orang lain.", en: "To intuitively pick up on the feelings of others." }
+        ]
+      },
+      {
+        id: 5, section: '1a',
+        ms: "Saya bekerja dengan lebih baik dalam kumpulan apabila...",
+        en: "I work better in a team if I am...",
+        options: [
+          { color: 'G', ms: "Bertukar pendapat secara aktif dengan orang lain.", en: "Actively involved with others in exchanging ideas." },
+          { color: 'R', ms: "Bekerja dalam suasana teratur dengan garis panduan yang jelas.", en: "Working in a structured environment with clear guidelines." },
+          { color: 'P', ms: "Bekerja ke arah menghasilkan matlamat yang tepat.", en: "Working towards a precise practical outcome." },
+          { color: 'B', ms: "Berhubung dengan ahli lain pada peringkat peribadi.", en: "Connecting with others at a personal level." }
+        ]
+      },
+      {
+        id: 6, section: '1a',
+        ms: "Saya mendapat kefahaman lebih apabila...",
+        en: "I learn the most when...",
+        options: [
+          { color: 'G', ms: "Diberi kebebasan untuk meneroka secara kreatif dan tidak tertakluk kepada peraturan tetap.", en: "Have freedom to explore creatively and not confined to fixed rules." },
+          { color: 'R', ms: "Mengkaji dan mencipta struktur yang menyokong perspektif jangka panjang.", en: "Study and create structures that support long term perspectives." },
+          { color: 'P', ms: "Mengumpul maklumat sebanyak mungkin untuk pelaksanaan tindakan yang terancang.", en: "Gather as much information as possible to take well planned actions." },
+          { color: 'B', ms: "Membantu orang lain menyelesaikan masalah.", en: "Help people solve their problems." }
+        ]
+      },
+      {
+        id: 7, section: '1a',
+        ms: "Apabila berlaku kesilapan, saya...",
+        en: "When something goes wrong, I...",
+        options: [
+          { color: 'G', ms: "Lihat kepada keadaan dan individu di dalam persekitaran situasi tersebut.", en: "Look at the circumstances and people surrounding the situation." },
+          { color: 'R', ms: "Melihat kepada kepincangan operasi atau pengurusan.", en: "Look for the flaws in operation or planning." },
+          { color: 'P', ms: "Lihat situasi serta kepentingan setiap bahagian tersebut.", en: "Look at the situation and the importance of each of its parts." },
+          { color: 'B', ms: "Lihat kepada apa tindakan yang mungkin menyebabkan masalah itu berlaku (tanggungjawab peribadi).", en: "Look at the possibility of how my actions may have contributed to the problem." }
+        ]
+      },
+      {
+        id: 8, section: '1a',
+        ms: "Saya suka situasi yang membenarkan...",
+        en: "I like a situation that would allow...",
+        options: [
+          { color: 'G', ms: "Menjana idea-idea kreatif bagi membina perkara yang lebih baik.", en: "The development of new ideas for the creation of something better." },
+          { color: 'R', ms: "Struktur persekitaran yang boleh diharapkan.", en: "A reliable, structured environment." },
+          { color: 'P', ms: "Proses yang teratur untuk memastikan kesempurnaan kerja.", en: "A systematic process of getting things done." },
+          { color: 'B', ms: "Diberikan peluang untuk ekspresi kreatif dan hubungan manusia.", en: "Opportunities for creative expression." }
+        ]
+      },
+      {
+        id: 9, section: '1a',
+        ms: "Saya tahu saya capai tugasan baik apabila...",
+        en: "I know I did a good job when...",
+        options: [
+          { color: 'G', ms: "Saya secepat mungkin dapat mengumpul bersama dan menyelesaikan secara berkesan tugasan yang samar.", en: "I pulled others together to quickly and effectively finish an unclear task." },
+          { color: 'R', ms: "Saya mentadbir untuk mendapat penjelasan kepada projek jangka panjang.", en: "I have managed to gain further clarity to a long term project." },
+          { color: 'P', ms: "Saya mengetahui saya berjaya memberikan cadangan yang praktikal untuk perancangan.", en: "I know I served a practical purpose in the greater plan." },
+          { color: 'B', ms: "Pihak lain rasa gembira.", en: "Others feel good." }
+        ]
+      },
+      {
+        id: 10, section: '1a',
+        ms: "Bila pihak lain rasa muram, saya akan...",
+        en: "When others around me are feeling fairly poor, I tend to...",
+        options: [
+          { color: 'G', ms: "Bantu mereka untuk mengatasinya.", en: "Try to help them get over it." },
+          { color: 'R', ms: "Simpan sahaja pada diri dan berikan ruang kepada mereka.", en: "Keep to myself to give them space." },
+          { color: 'P', ms: "Bantu mereka fokus kembali kepada peranan mereka.", en: "Help them focus on their role." },
+          { color: 'B', ms: "Bersimpati dengan masalah mereka dan sama libat rasa seperti apa mereka rasakan.", en: "Sympathize with them and feel what they feel." }
+        ]
+      },
+      // Bahagian 1B (11-15)
+      {
+        id: 11, section: '1b',
+        ms: "Saya belajar paling baik apabila saya...",
+        en: "I learn best when I am...",
+        options: [
+          { color: 'G', ms: "Banyak melakukan ujikaji.", en: "Actively experimenting." },
+          { color: 'R', ms: "Mempelajari melalui pembentangan yang berstruktur dan jelas.", en: "Learning off a clear, structured presentation." },
+          { color: 'P', ms: "Menyedari sepenuhnya sebab-sebab untuk mempelajari sesuatu bahan (sistematik).", en: "Fully aware of the reasons for learning the material." },
+          { color: 'B', ms: "Berhubung dengan orang lain.", en: "Interacting with others." }
+        ]
+      },
+      {
+        id: 12, section: '1b',
+        ms: "Perkataan TERBAIK yang menggambarkan diri saya...",
+        en: "A word that BEST describes me...",
+        options: [
+          { color: 'G', ms: "Spontan.", en: "Spontaneous." },
+          { color: 'R', ms: "Menganalisa.", en: "Analytical." },
+          { color: 'P', ms: "Sistematik / teratur.", en: "Systematic." },
+          { color: 'B', ms: "Berempati / penuh perasaan.", en: "Empathic." }
+        ]
+      },
+      {
+        id: 13, section: '1b',
+        ms: "Apabila mengendalikan aktiviti atau projek baru, saya cenderung untuk...",
+        en: "When approaching a new activity or project, my first inclination is to...",
+        options: [
+          { color: 'G', ms: "Melihat dari sudut pandangan menyeluruh (big picture) dan kenal pasti apa yang perlu dari masa ke semasa.", en: "Look at it from an overall 'big picture' perspective and figure it out as I go along." },
+          { color: 'R', ms: "Menganalisa setiap bahagian aktiviti atau projek bagi mendapatkan cara terbaik untuk melaksanakannya.", en: "Analyze the parts of the activity or project to find the best way to do it." },
+          { color: 'P', ms: "Mengumpul sebanyak mungkin maklumat berhubung projek berkenaan.", en: "Gather as much information about it as possible." },
+          { color: 'B', ms: "Melihat mereka yang terlibat sama dan mencari sinergi yang boleh diwujudkan.", en: "Look at the other people involved and see what synergy can be established." }
+        ]
+      },
+      {
+        id: 14, section: '1b',
+        ms: "Yang manakah adalah TERBAIK menceritakan tentang proses untuk mengambil tindakan?",
+        en: "Which BEST describes the process for taking action?",
+        options: [
+          { color: 'G', ms: "Dapatkan sedikit maklumat dahulu, bertindak dengan cepat, kemudian lihat hasilnya dan perbetulkan.", en: "Get a little information, act on it quickly, then see the result and adjust." },
+          { color: 'R', ms: "Dapatkan maklumat, analisa dengan berhati-hati, seterusnya mengambil tindakan yang sewajarnya.", en: "Get information, analyze it carefully, then take the appropriate action." },
+          { color: 'P', ms: "Dapatkan maklumat secukupnya untuk memahami secara sepenuhnya, lakukan semakan dan kemudian wujudkan perancangan untuk pelaksanaan.", en: "Get enough information to understand fully, review it, then set a plan for implementation." },
+          { color: 'B', ms: "Kaji situasi, dapatkan maklumat dan hubungkaitkan dengan pengalaman peribadi, ambil tindakan ringan dahulu dan lihat bagaimana rasanya sebelum meneruskan tindakan.", en: "Review the situation, get some information and relate it to personal experience, take small actions, and see how it feels before proceeding." }
+        ]
+      },
+      {
+        id: 15, section: '1b',
+        ms: "Faktor UTAMA penting di dalam komunikasi yang berkesan adalah apabila...",
+        en: "The MOST important factor to effective communication is when...",
+        options: [
+          { color: 'G', ms: "Orang memberi maklum balas atas idea yang dizahirkan anda kepada mereka yang terlibat.", en: "People give you feedback on your ideas as you express them." },
+          { color: 'R', ms: "Seseorang memberi penerangan yang panjang dan lengkap berkaitan sesuatu perkara.", en: "A person gives a long and complete explanation of the subject." },
+          { color: 'P', ms: "Seseorang yang memberikan perincian berhubung sesuatu perkara di dalam bentuk butiran.", en: "Someone gives an itemized deliberation of the subject in bullet points." },
+          { color: 'B', ms: "Pihak lain bersikap seperti mereka prihatin dengan apa yang saya katakan.", en: "The other person appears like they really care about what I'm talking about." }
+        ]
+      }
+    ];
+
+    const COLOR_PROFILES = {
+      G: {
+        title: 'HIJAU (Green - Chaotic / Random Processing)',
+        shortName: 'HIJAU',
+        bgClass: 'bg-brain-green',
+        textClass: 'text-brain-green',
+        borderClass: 'border-brain-green',
+        traits: [
+          'Nothing is connected (Pemprosesan tidak linear)',
+          'Must act to understand (Perlu bertindak untuk faham)',
+          'Need feedback (Perlu maklum balas)',
+          'See big picture (Melihat gambaran besar)',
+          'Find alternatives (Mencari alternatif)'
+        ],
+        description: 'Pemprosesan Hijau (Chaotic) berfungsi secara rawak, mengumpul maklumat dalam serpihan yang tidak berurutan. Anda cenderung untuk mengambil tindakan dengan cepat (Action First) berdasarkan pandangan "gambaran besar" dan memproses maklumat sambil berjalan. Anda sangat kreatif, spontan, dan gemar mencari penyelesaian alternatif.'
+      },
+      R: {
+        title: 'MERAH (Red - Linear Processing)',
+        shortName: 'MERAH',
+        bgClass: 'bg-brain-red',
+        textClass: 'text-brain-red',
+        borderClass: 'border-brain-red',
+        traits: [
+          'Need clarity (Perlu kejelasan)',
+          'Must see objective (Mesti melihat objektif)',
+          'See logic (Melihat logik)',
+          'Must analyze (Mesti menganalisis)',
+          'Find structure (Mencari struktur)'
+        ],
+        description: 'Pemprosesan Merah (Linear) memerlukan kejelasan dan struktur. Anda memproses maklumat secara berurutan, menganalisis fakta dengan teliti, dan mencari logik yang objektif. Anda hanya mengambil tindakan selepas analisis mendalam, merancang untuk jangka panjang, dan mementingkan garis panduan yang jelas.'
+      },
+      B: {
+        title: 'BIRU (Blue - Intuitive Processing)',
+        shortName: 'BIRU',
+        bgClass: 'bg-brain-blue',
+        textClass: 'text-brain-blue',
+        borderClass: 'border-brain-blue',
+        traits: [
+          'Everything is connected (Semua perkara berhubung)',
+          'Feel environment (Merasai persekitaran)',
+          'Insightful of surroundings (Berwawasan terhadap persekitaran)',
+          'Multi-tasking (Multi-tugas)',
+          'Intuitive of others (Intuitif terhadap orang lain)'
+        ],
+        description: 'Pemprosesan Biru (Intuitive) menghubungkan semua perkara, termasuk emosi dan pengalaman lalu, untuk membentuk gerak hati. Anda sangat berempati, peka terhadap perasaan orang lain, dan memahami dinamik persekitaran sosial. Komunikasi berkesan bagi anda memerlukan hubungan peribadi dan keikhlasan.'
+      },
+      P: {
+        title: 'UNGU (Purple - Relational Processing)',
+        shortName: 'UNGU',
+        bgClass: 'bg-brain-purple',
+        textClass: 'text-brain-purple',
+        borderClass: 'border-brain-purple',
+        traits: [
+          'Must have information (Mesti ada maklumat)',
+          'All data is linked (Semua data dipautkan)',
+          'Need details (Perlu perincian)',
+          'Find system (Mencari sistem)',
+          'Find options (Mencari pilihan)'
+        ],
+        description: 'Pemprosesan Ungu (Relational) menjadikan maklumat sebagai keutamaan. Anda memerlukan data yang lengkap dan terperinci untuk melihat bagaimana setiap bahagian saling berkait. Anda mengambil masa untuk membuat keputusan bagi memastikan prosesnya sistematik, teratur, dan mempunyai pelan pelaksanaan yang praktikal.'
+      }
+    };
+
+    function renderQuestions() {
+      const container1A = document.getElementById('questions-1a');
+      const container1B = document.getElementById('questions-1b');
+
+      QUIZ_DATA.forEach((q) => {
+        const questionCard = document.createElement('div');
+        questionCard.id = `question-block-${q.id}`;
+        questionCard.className = 'p-5 md:p-6 bg-slate-50/80 rounded-2xl border border-slate-200/80 transition-all';
+
+        const optionsHTML = q.options.map((opt) => `
+          <label class="block cursor-pointer group">
+            <input type="radio" name="q${q.id}" value="${opt.color}" class="sr-only" onchange="handleAnswerChange()">
+            <div class="choice-card p-4 bg-white border-2 border-slate-200 rounded-xl group-hover:border-blue-300 flex items-start space-x-3.5">
+              <div class="radio-indicator w-5 h-5 mt-0.5 rounded-full border-2 border-slate-300 flex items-center justify-center shrink-0 transition-colors"></div>
+              <div class="flex-1">
+                <p class="font-semibold text-slate-800 text-sm md:text-base leading-snug">${opt.ms}</p>
+                <p class="text-xs text-slate-500 mt-1 leading-relaxed">${opt.en}</p>
+              </div>
+            </div>
+          </label>
+        `).join('');
+
+        questionCard.innerHTML = `
+          <div class="mb-4">
+            <h3 class="text-base md:text-lg font-bold text-slate-800 leading-snug">
+              <span class="text-blue-600 mr-1">${q.id}.</span> ${q.ms}
+            </h3>
+            <p class="text-xs md:text-sm text-slate-500 mt-1">${q.en}</p>
+          </div>
+          <div class="space-y-3">
+            ${optionsHTML}
+          </div>
+        `;
+
+        if (q.section === '1a') {
+          container1A.appendChild(questionCard);
+        } else {
+          container1B.appendChild(questionCard);
+        }
+      });
+    }
+
+    function handleAnswerChange() {
+      const scores1a = { G: 0, R: 0, P: 0, B: 0 };
+      const scores1b = { G: 0, R: 0, P: 0, B: 0 };
+      let answeredCount = 0;
+
+      QUIZ_DATA.forEach((q) => {
+        const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
+        const block = document.getElementById(`question-block-${q.id}`);
+
+        if (selected) {
+          answeredCount++;
+          block.classList.remove('ring-2', 'ring-red-400', 'bg-red-50/40');
+
+          if (q.section === '1a') {
+            scores1a[selected.value] += 10;
+          } else {
+            scores1b[selected.value] += 10;
+          }
+        }
+      });
+
+      const percentage = Math.round((answeredCount / QUIZ_DATA.length) * 100);
+      document.getElementById('progress-text').textContent = `${answeredCount} / ${QUIZ_DATA.length}`;
+      document.getElementById('progress-bar').style.width = `${percentage}%`;
+
+      ['G', 'R', 'P', 'B'].forEach(color => {
+        document.getElementById(`score-${color}-1a`).textContent = scores1a[color];
+        document.getElementById(`score-${color}-1b`).textContent = scores1b[color];
+      });
+
+      const total1a = Object.values(scores1a).reduce((a, b) => a + b, 0);
+      const total1b = Object.values(scores1b).reduce((a, b) => a + b, 0);
+      document.getElementById('total-1a').textContent = total1a;
+      document.getElementById('total-1b').textContent = total1b;
+
+      if (answeredCount === QUIZ_DATA.length) {
+        document.getElementById('status-banner').classList.add('hidden');
+      }
+    }
+
+    function calculateResults() {
+      const statusBanner = document.getElementById('status-banner');
+      const statusMessage = document.getElementById('status-message');
+      let firstUnansweredBlock = null;
+      let answeredCount = 0;
+      const finalScores = { G: 0, R: 0, P: 0, B: 0 };
+
+      QUIZ_DATA.forEach((q) => {
+        const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
+        const block = document.getElementById(`question-block-${q.id}`);
+
+        if (selected) {
+          answeredCount++;
+          finalScores[selected.value] += 10;
+        } else {
+          block.classList.add('ring-2', 'ring-red-400', 'bg-red-50/40');
+          if (!firstUnansweredBlock) {
+            firstUnansweredBlock = block;
+          }
+        }
+      });
+
+      if (answeredCount < QUIZ_DATA.length) {
+        statusMessage.textContent = `Sila lengkapkan semua soalan sebelum mengira keputusan. Anda telah menjawab ${answeredCount} daripada ${QUIZ_DATA.length} soalan.`;
+        statusBanner.classList.remove('hidden');
+        if (firstUnansweredBlock) {
+          firstUnansweredBlock.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+
+      statusBanner.classList.add('hidden');
+
+      const sortedResults = Object.keys(finalScores)
+        .map(key => ({ key, score: finalScores[key] }))
+        .sort((a, b) => b.score - a.score);
+
+      const maxScore = sortedResults[0].score;
+      const topColors = sortedResults.filter(item => item.score === maxScore);
+      const userName = document.getElementById('user-name').value.trim() || 'Peserta';
+
+      // Dominant card
+      const dominantCard = document.getElementById('dominant-card');
+      if (topColors.length > 1 || maxScore < 40) {
+        const tiedNames = topColors.map(c => COLOR_PROFILES[c.key].shortName).join(' & ');
+        dominantCard.innerHTML = `
+          <p class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-1">Profil Pemikiran ${userName}</p>
+          <h3 class="text-3xl md:text-4xl font-black text-slate-800 mb-3">Fleksibiliti Tinggi (${tiedNames})</h3>
+          <p class="text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            Anda menunjukkan keseimbangan dan fleksibiliti yang tinggi merentasi gaya pemprosesan yang berbeza. Anda mampu menyesuaikan cara anda berfikir, berkomunikasi, dan menyelesaikan masalah mengikut keperluan situasi semasa.
+          </p>
+        `;
+      } else {
+        const domProfile = COLOR_PROFILES[topColors[0].key];
+        dominantCard.innerHTML = `
+          <p class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-1">${userName}, Warna Otak Dominan Anda Ialah</p>
+          <div class="my-3">
+            <span class="text-5xl md:text-6xl font-black tracking-tight ${domProfile.textClass}">
+              ${domProfile.shortName}
+            </span>
+          </div>
+          <p class="text-slate-600 max-w-2xl mx-auto leading-relaxed mt-4">
+            ${domProfile.description}
+          </p>
+        `;
+      }
+
+      // Final scores grid
+      const scoresGrid = document.getElementById('final-scores-grid');
+      scoresGrid.innerHTML = ['G', 'R', 'P', 'B'].map(colorKey => {
+        const profile = COLOR_PROFILES[colorKey];
+        const score = finalScores[colorKey];
+        const isTop = score === maxScore;
+        return `
+          <div class="p-5 rounded-2xl ${profile.bgClass} text-white text-center shadow-md transition-transform ${isTop ? 'ring-4 ring-amber-300 scale-105' : 'opacity-90'}">
+            <div class="text-3xl md:text-4xl font-black">${score}</div>
+            <div class="text-xs font-bold uppercase tracking-wider mt-1 opacity-95">${profile.shortName}</div>
+          </div>
+        `;
+      }).join('');
+
+      // Detailed analysis
+      const detailedAnalysis = document.getElementById('detailed-analysis');
+      detailedAnalysis.innerHTML = sortedResults.map((item, idx) => {
+        const profile = COLOR_PROFILES[item.key];
+        const isHighest = idx === 0;
+        return `
+          <div class="p-6 rounded-2xl bg-white border-2 ${isHighest ? profile.borderClass + ' shadow-md' : 'border-slate-200'}">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <h4 class="text-lg md:text-xl font-extrabold ${profile.textClass}">
+                ${profile.title}
+              </h4>
+              <span class="px-3 py-1 rounded-lg bg-slate-100 text-slate-800 font-extrabold text-sm">
+                ${item.score} / 150 Mata
+              </span>
+            </div>
+            <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 my-4 text-sm text-slate-700">
+              ${profile.traits.map(trait => `
+                <li class="flex items-center space-x-2">
+                  <span class="w-1.5 h-1.5 rounded-full ${profile.bgClass}"></span>
+                  <span>${trait}</span>
+                </li>
+              `).join('')}
+            </ul>
+            <p class="text-sm text-slate-600 leading-relaxed pt-3 border-t border-slate-100">
+              ${profile.description}
+            </p>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('quiz-container').classList.add('hidden');
+      document.getElementById('results-container').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetQuiz() {
+      document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.checked = false;
+      });
+      handleAnswerChange();
+      document.getElementById('results-container').classList.add('hidden');
+      document.getElementById('quiz-container').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.addEventListener('DOMContentLoaded', renderQuestions);
+  </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "name": "Ujian Colored Brain — Arthur F. Carmazzi",
+  "description": "Penilaian gaya pemprosesan kognitif Colored Brain oleh Arthur F. Carmazzi dengan skor masa nyata dan analisis profil pemikiran dwibahasa.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
